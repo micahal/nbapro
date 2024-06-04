@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the NBA Player!</title>
+    <style>
+        body {
+            background-image: url('./nbaprobac.jpg');
+            background-size: cover;
+            text-align: center;
+            color: rgb(26, 20, 21);
+        }
+        .autocomplete-suggestions {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #e4dada;
+            color: #000;
+            position: absolute;
+            width: calc(100% - 20px);
+            left: 10px;
+            z-index: 1000;
+        }
+        .autocomplete-suggestion {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .autocomplete-suggestion:hover {
+            background-color: #c2c2c2;
+        }
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #968b8b;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="font-size: 48px; color: #fff; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">Guess the NBA Player!</h1>    <input id="Player" onfocus="showSuggestions()" oninput="filterSuggestions()"> 
+    <div id="suggestions" class="autocomplete-suggestions"></div>
+    <br><br>
+    <button onclick="allFunctions()">Submit</button>
+    <h1 id="followup"></h1>
+    <h1 id="followup2"></h1>
+    <h1 id="followup3"></h1>
+    <h1 id="followup4"></h1>
+    <h1 id="followup5"></h1>
+
+    
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-text"></h2>
+            <img id="player-image" src="" alt="Player Image" style="max-width: 100%; height: auto;">
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let playersData = [];
+
+        // Load the JSON data
+        fetch('./nbawithurls.json')
+            .then(res => res.json())
+            .then(data => {
+                playersData = data;
+                startNewGame();
+            });
+
+        function startNewGame() {
+            let marker1 = false;
+            let max = playersData.length;
+            let randomNum = Math.floor(Math.random() * max);
+            window.selectedPlayer = playersData[randomNum];
+            console.log(window.selectedPlayer.College[0])
+            if (window.selectedPlayer.College[0] === 'h') {
+                marker1 = false;
+            } else {
+                marker1 = true;
+            }
+            while (marker1 === true) {
+                let max = playersData.length;
+                let randomNum = Math.floor(Math.random() * max);
+                window.selectedPlayer = playersData[randomNum];
+                    if (window.selectedPlayer.College[0] === 'h') {
+                        marker1 = false;
+                    }
+            }
+            marker = 1;
+            document.getElementById('Player').value = '';
+            document.getElementById('followup').innerHTML = '';
+            document.getElementById('followup2').innerHTML = '';
+            document.getElementById('followup3').innerHTML = '';
+            document.getElementById('followup4').innerHTML = '';
+            document.getElementById('followup5').innerHTML = '';
+        }
+
+        let marker = 1;
+        function showSuggestions() {
+            const suggestionsContainer = document.getElementById('suggestions');
+            suggestionsContainer.innerHTML = '';
+
+            playersData.forEach(player => {
+                const div = document.createElement('div');
+                div.classList.add('autocomplete-suggestion');
+                div.textContent = player.Name;
+                div.onclick = function() {
+                    document.getElementById('Player').value = player.Name;
+                    suggestionsContainer.innerHTML = '';
+                };
+                suggestionsContainer.appendChild(div);
+            });
+
+            suggestionsContainer.style.display = 'block';
+        }
+
+        function filterSuggestions() {
+            const input = document.getElementById('Player').value.toLowerCase();
+            const suggestionsContainer = document.getElementById('suggestions');
+            suggestionsContainer.innerHTML = '';
+
+            playersData
+                .filter(player => player.Name.toLowerCase().includes(input))
+                .forEach(player => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-suggestion');
+                    div.textContent = player.Name;
+                    div.onclick = function() {
+                        document.getElementById('Player').value = player.Name;
+                        suggestionsContainer.innerHTML = '';
+                    };
+                    suggestionsContainer.appendChild(div);
+                });
+        }
+
+        function myFunction() {
+            const playerName = document.querySelector("#Player").value;
+            const followup = document.querySelector("#followup");
+            const followup2 = document.querySelector("#followup2");
+            const followup3 = document.querySelector("#followup3");
+            const followup4 = document.querySelector("#followup4");
+            const followup5 = document.querySelector("#followup5");
+
+            if (window.selectedPlayer.Name === playerName) {
+                document.getElementById('followup').innerHTML = '';
+                document.getElementById('followup2').innerHTML = '';
+                document.getElementById('followup3').innerHTML = '';
+                document.getElementById('followup4').innerHTML = '';
+                document.getElementById('followup5').innerHTML = '';
+                showModal("Correct! The NBA Player is " + playerName, window.selectedPlayer.College);
+            } else {
+                if (marker === 1) {
+                    marker++;
+                    followup.innerHTML = '<span style="color: #fff; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">Incorrect! The player plays for the ' + window.selectedPlayer.Team;
+                } else if (marker === 2) {
+                    marker++;
+                    followup2.innerHTML = '<span style="color: #fff; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">Incorrect! The player is ' + window.selectedPlayer.Age + ' years old</span>';
+                } else if (marker === 3) {
+                    marker++;
+                    followup3.innerHTML = '<span style="color: #fff; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">Incorrect! The players position is ' + window.selectedPlayer.Position;
+                } else if (marker === 4) {
+                    marker++;
+                    followup4.innerHTML = '<span style="color: #fff; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">Incorrect! The players height is ' + window.selectedPlayer.Height;
+                } else if (marker === 5) {
+                    marker++;
+                    followup5.innerHTML = '<span style="color: #fff; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;">Incorrect! The player weighs ' + window.selectedPlayer.Weight + ' lbs';
+                } else if (marker === 6) {
+                    document.getElementById('followup').innerHTML = '';
+                    document.getElementById('followup2').innerHTML = '';
+                    document.getElementById('followup3').innerHTML = '';
+                    document.getElementById('followup4').innerHTML = '';
+                    document.getElementById('followup5').innerHTML = '';
+                    console.log(window.selectedPlayer.College)
+                    showModal('Incorrect! The NBA Player was ' + window.selectedPlayer.Name, window.selectedPlayer.College);
+                }
+            }
+        }
+
+        function allFunctions() {
+            myFunction();
+        }
+
+        function showModal(message, College) {
+            document.getElementById('modal-text').textContent = message;
+            document.getElementById('myModal').style.display = 'block';
+            document.getElementById('player-image').src = College;
+        }
+
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        function restartGame() {
+            closeModal();
+            startNewGame();
+        }
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.autocomplete-suggestions') && event.target.id !== 'Player') {
+                document.getElementById('suggestions').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
