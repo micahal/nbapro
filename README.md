@@ -1,0 +1,1 @@
+This project allows the user to create a local HTML server, and then guess the NBA player given 5 tries. With each incorrect guess comes a clue. To guess the NBA player use the dropdown menu, once the game is finished, a modal window will pop up with the image of the correct player, asking if you would like to play again or close the game. 
